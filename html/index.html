@@ -1,0 +1,113 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="styles/main.css?v=201808300902" />
+        <script src="/libs/qimessaging/2/qimessaging.js"></script>
+        <script src="javascripts/polyfill.js"></script>
+        <script>
+        window.addEventListener("error", handleError, true);
+        function handleError(evt) {
+            if (evt.message) { // Chrome sometimes provides this
+                alert("error: "+evt.message +" at linenumber: "+evt.lineno+" of file: "+evt.filename);
+            } else {
+                alert("error: "+evt.type+" from element: "+(evt.srcElement || evt.target));
+            }
+        }
+        </script>
+    </head>
+    <body>
+        <div class="content">
+        <form method="post" autocomplete="off" novalidate>
+            <div class="survey-group">
+                <div id="start" class="survey-box">
+                  <button type="button" class="btn-navigate" data-next="0">Begin</button>
+                </div>
+                <div id="0" class="survey-box">
+                    <h1>Welcome, my name is Pepper, nice to meet you</h1>
+                      <p>Please use my touchscreen to start.</p>
+                      <p>There is a progress bar at the bottom.</p>
+                      <p>I can only read dialog if I am connected to the robot. <br />Otherwise I will post the dialog to console (press F12)</p>
+                    <button type="button" class="btn-navigate" data-next="1">Next</button>
+                </div>
+                <div id="1" class="survey-box">
+                    <h1 class="hidden" data-auto-transition>This is an example dialog box.</h1>
+                    <button type="button" class="btn-navigate hidden" data-next="2">Next</button>
+                </div>
+                <div id="2" class="survey-box">
+                  <h1 class="hidden" data-auto-transition data-animated>^start(animations/Stand/BodyTalk/Speaking?BodyTalk_3) This is an example dialog box with an animation ^start(animations/Stand/Gestures/Far_2)</h1>
+                  <button type="button" class="btn-navigate hidden" data-next="3">Next</button>
+                </div>
+                <div id="3" class="survey-box">
+                  <h1>This is an example of a simple yes or no question with branching.</h1>
+                  <p>Please press 'yes' or 'no'</p>
+                  <button type="button" class="btn-navigate" data-next="4-a">Yes</button>
+                  <button type="button" class="btn-navigate" data-next="4-b">No</button>
+                </div>
+                <div id="4-a" class="survey-box">
+                  <h1 data-auto-transition>You selected Yes</h1>
+                  <button type="button" class="btn-navigate hidden" data-next="5">Next</button>
+                </div>
+                <div id="4-b" class="survey-box">
+                  <h1 data-auto-transition>You selected No</h1>
+                  <button type="button" class="btn-navigate hidden" data-next="5">Next</button>
+                </div>
+                <div id="5" class="survey-box">
+                  <h1>Here is an example of branching using selected fields.</h1>
+                  <p>Use delays to make the user wait before pressing next.</p>
+                  <p>
+                    <label class="radio-container"><input type="radio" name="response_0" value="0">No<span class="checkmark"></span></label>
+                    <label class="radio-container"><input type="radio" name="response_0" value="1" id="example_1">Yes<span class="checkmark"></span></label>
+                  </p>
+                  <button type="button" class="btn-navigate" data-next="example_1=6-a;6-b" data-delay="3:You must wait 3 seconds before pressing next">Next</button>
+                </div>
+                <div id="6-a" class="survey-box">
+                  <h1 data-auto-transition>You selected Yes</h1>
+                  <button type="button" class="btn-navigate hidden" data-next="7">Next</button>
+                </div>
+                <div id="6-b" class="survey-box">
+                  <h1 data-auto-transition>You selected No</h1>
+                  <button type="button" class="btn-navigate hidden" data-next="7">Next</button>
+                </div>
+                <div id="7" class="survey-box">
+                  <h1 class="hidden">This is an example Likert scale question</h1>
+                  <h1>You can use data-replace to insert selected options into text in future sections</h1>
+                  <h2 class="likert">
+                      <span>Not at all</span>Confidence<span>Extremely</span>
+                  </h2>
+                  <p>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="0" data-replace="x:0">0<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="1" data-replace="x:1">1<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="2" data-replace="x:2">2<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="3" data-replace="x:3">3<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="4" data-replace="x:4">4<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="5" data-replace="x:5">5<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="6" data-replace="x:6">6<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="7" data-replace="x:7">7<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="8" data-replace="x:8">8<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="9" data-replace="x:9">9<span class="checkmark"></span></label>
+                      <label class="radio-container"><input type="radio" name="likert_example" value="10" data-replace="x:10">10<span class="checkmark"></span></label>
+                  </p>
+                  <button type="button" class="btn-navigate" data-next="8">Next</button>
+              </div>
+              <div id="8" class="survey-box">
+                <h1>You selected <span class="x"></span></h1>
+                <button type="button" class="btn-navigate" data-next="9">Next</button>
+              </div>
+              <div id="9" class="survey-box">
+                <h1 data-ignore>This is an example of me not reading the text</h1>
+                <button type="button" class="btn-navigate" data-next="10">Next</button>
+              </div>
+              <div id="10" class="survey-box">
+                <h1>Now it is time to finish!</h1>
+                <p>I will only be able to submit if the survey service is running on the robot</p>
+                <button type="button" class="btn-submit" data-next="9">Finish</button>
+              </div>
+            </div>
+            <div class="popup">
+                <span class="popuptext" id="invalid-popup"><span style="color: red">&#10071;</span> <span id="invalid-message"></span></span>
+            </div>
+        </form>
+        </div>
+        <footer id="progress-bar" class="progress-bar"></footer>
+        <script src="javascripts/main.js?v=201808300902"></script>
+    </body>
+</html>
