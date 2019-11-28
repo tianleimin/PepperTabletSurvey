@@ -471,20 +471,20 @@ Array.from(document.getElementsByClassName('btn-navigate')).forEach(function (el
 
             var condition_ids = items[0] || undefined
             var transition_id = items[1] || undefined
-            
+
             var result = condition_ids.split('&').every(function(condition_id) {
                 if (condition_id.startsWith('call:')) {
-                    return window[self.dataset.depends.substring(5)](parent.parentNode)    
+                    return window[self.dataset.depends.substring(5)](parent.parentNode)
                 }
 
                 var depends = document.getElementById(condition_id)
                 return depends == undefined || depends.checked
             })
-            
+
             if (result) {
                 next_element_id = transition_id
                 break
-            }            
+            }
         }
 
         var next_element = document.getElementById(next_element_id)
