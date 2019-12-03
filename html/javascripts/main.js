@@ -39,128 +39,10 @@ function fadeIn(el, display){
 function daydiff(first, second) {
     return Math.round((first-second)/(1000*60*60*24));
 }
-function grade(parent) {
-    if (parent.dataset.gradingDepends && !document.getElementById(parent.dataset.gradingDepends).checked) {
-        return
-    }
-    var method = parent.dataset.grading
-    if (method == 'sum') {
-        return summed(parent)
-    }
-    if (method == 'q_score') {
-        return q_score(parent)
-    }
-}
-function dass_21() {
-    scores = [0, 0, 0]
-    var rubrik = [
-        [0,0,1], //1
-        [0,1,0], //2
-        [1,0,0], //3
-        [0,1,0], //4
-        [1,0,0], //5
-        [0,0,1], //6
-        [0,1,0], //7
-        [0,0,1], //8
-        [0,1,0], //9
-        [1,0,0], //10
-        [0,0,1], //11
-        [0,0,1], //12
-        [1,0,0], //13
-        [0,0,1], //14
-        [0,1,0], //15
-        [1,0,0], //16
-        [1,0,0], //17
-        [0,0,1], //18
-        [0,1,0], //19
-        [0,1,0], //20
-        [1,0,0]  //21
-    ]
-    for (i = 1; i <= 21; i++) {
-        var elements = document.getElementsByName('dass21['+ i.toString() +']')
-        for (j = 0; j < elements.length; j++) {
-            if (elements[j].checked) {
-                scores[rubrik[i - 1].indexOf(1)] += parseInt(elements[j].value)
-                break;
-            }
-        }
-    }
-    return scores[0] > 11 || scores[1] >= 8 || scores[2] >= 13
-}
-function k10() {
-    var score = 0
-    for (i = 1; i <= 21; i++) {
-        var elements = document.getElementsByName('k10['+ i.toString() +']')
-        for (j = 0; j < elements.length; j++) {
-            if (elements[j].checked) {
-                score += parseInt(elements[j].value)
-                break;
-            }
-        }
-    }
-    return score >= 16
-}
 function randomize() {
     var number = Math.random()
-    var result = number < 0.5
+    var result = number < 0.3
     return result
-}
-function summed(parent) {
-    var storage = document.getElementsByName(parent.dataset.gradingTo)[0]
-
-    var fields = parent.getElementsByClassName('graded')
-    var score = 0
-
-    for (idx = 0; idx < fields.length; idx++) {
-        var field = fields[idx]
-        if (field.type == 'radio' || field.type == 'checkbox') {
-            score += field.checked ? parseInt(field.value) : 0
-        } else {
-            score += parseInt(field.value)
-        }
-    }
-    storage.value = score
-}
-function q_score(parent) {
-    var storage = document.getElementsByName(parent.dataset.gradingTo)[0]
-
-    var q1 = parent.getElementsByClassName('q1')
-    var q2 = parent.getElementsByClassName('q2')
-    var d1 = parent.getElementsByClassName('d1')
-    var d2 = parent.getElementsByClassName('d2')
-    var d3 = parent.getElementsByClassName('d3')
-
-    if (q1.length == 0) {
-        console.error('Unable to located field: q1')
-        return
-    }
-    if (q2.length == 0) {
-        console.error('Unable to located field: q2')
-        return
-    }
-    if (d1.length == 0) {
-        console.error('Unable to located field: d1')
-        return
-    }
-    if (d2.length == 0) {
-        console.error('Unable to located field: d2')
-        return
-    }
-    if (d3.length == 0) {
-        console.error('Unable to located field: d3')
-        return
-    }
-    q1 = parseInt(q1[0].value)
-    q2 = parseInt(q2[0].value)
-    d1 = d1[0].valueAsDate
-    d2 = d2[0].valueAsDate
-    d3 = d3[0].valueAsDate
-
-    var t1 = daydiff(d1, d2)
-    var t2 = daydiff(d2, d3)
-
-    q = (q1 + q2) / (t1 + t2)
-    storage.value = q
 }
 function reportValidity(element, message) {
     message = message || 'There are unanswered questions'
@@ -302,7 +184,7 @@ function readCaption(element) {
         if (caption.dataset.animation) {
             animate(caption)
         }
-        return say(caption.innerText, caption.dataset.autoTransition != undefined, caption.dataset.animated != undefined)
+        return say(caption.innerText, caption.dataset.autoTransition != undefined, caption.dataset.animated)
     }
     return Promise.resolve(element.dataset.autoTransition != undefined)
 }
@@ -323,17 +205,33 @@ function readFeedback(element) {
     return Promise.resolve(true)
 }
 function say(text, transition, animated) {
-    transition= transition || false
+    transition = transition || false
     animated = animated || false
 
-    service = animated ? animated_speech_service : speech_service
+    //service = animated != undefined ? animated_speech_service : speech_service
+    service = animated_speech_service;
 
     if (!service) {
         console.info(text)
-        return Promise.resolve(transition)
+        
+        return new Promise(function (resolve) {
+          return setTimeout(function () {
+            resolve(transition)
+          }, 2000)
+        })
     }
-
-    service.say(text)
+  
+    if (animated && animated.length == 0) {
+      service.say(text);
+    } else if (animated && animated.length != 0) {
+      service.say(text, { 
+        bodyLanguageMode : animated
+      })
+    } else {
+      service.say(text, { 
+        bodyLanguageMode : 'contextual'
+      })
+    }
 
     if (!memory_service) {
         return Promise.resolve(transition)
@@ -349,42 +247,21 @@ function say(text, transition, animated) {
                     subscriber.signal.disconnect(signalId).catch(function (err) {})
                 })
                 resolve(transition)
-
             })
         })
     })
 }
-function submitForm(active) {
-  if (!startTime) {
-    return
-  }
-
-  var active = active || document.querySelectorAll('.survey-box.active')
-
-  if (active && active.form) {
-    form = active.form
-  } else {
-    form = document.getElementsByTagName('form')[0]
-  }
-
-  var result = JSON.parse(toJSONString(form))
-  result['exit'] = active.id
-
-  result['time_taken'] = (new Date().getTime() - startTime.getTime()) / 1000;
-
-  if (survey_service) {
-      survey_service.save(JSON.stringify(result)).then(function (result) {
-          location.reload()
-      })
-  } else {
-      console.log(result)
-  }
+function submitForm() {
+  location.reload();
 }
 function connected(session) {
     if (!session) {
         return
     }
-    session.service('ALMemory').then(function(service) {
+
+    var promises = []
+
+    promises.push(session.service('ALMemory').then(function(service) {
         memory_service = service
 
         Array.from(document.querySelectorAll('[data-transition-event]')).forEach(function (element) {
@@ -414,30 +291,34 @@ function connected(session) {
                 submitForm()
             });
         })
-    })
+    }));
 
-    session.service('ALTextToSpeech')
-    .then(function(service) {
-        service.setParameter("speed", 80)
-        speech_service = service
-    })
-    .then(function() { return session.service('ALAnimatedSpeech') })
-    .then(function(service) {
-        animated_speech_service = service
-    })
-    .then(function() {
+    promises.push(session.service('ALTextToSpeech')
+      .then(function(service) {
+          service.setParameter("speed", 80)
+          speech_service = service
+      }));
+
+    promises.push(session.service('ALAnimatedSpeech')
+      .then(function(service) {
+          animated_speech_service = service
+      }));
+
+    promises.push(session.service('ALAnimationPlayer').then(function(service) {
+      animation_service = service
+    }))
+
+    Promise.all([promises]).then(function () {
+      setTimeout(function () {
+        if (document.getElementsByClassName('active').length == 0) {
+          document.getElementsByClassName('survey-box')[0].classList.add('active')
+          document.getElementsByClassName('survey-box')[0].querySelector('button').disabled = false;
+        }
         var boxes = document.getElementsByClassName('survey-box')
         if (boxes.length != 0) {
             readCaption(boxes[0])
         }
-    })
-
-    session.service('ALAnimationPlayer').then(function(service) {
-      animation_service = service
-    })
-
-    session.service('SurveyService').then(function(service) {
-        survey_service = service
+      }, 500);
     })
 }
 function disconnected() {
@@ -471,20 +352,21 @@ Array.from(document.getElementsByClassName('btn-navigate')).forEach(function (el
 
             var condition_ids = items[0] || undefined
             var transition_id = items[1] || undefined
-
+            
             var result = condition_ids.split('&').every(function(condition_id) {
                 if (condition_id.startsWith('call:')) {
-                    return window[self.dataset.depends.substring(5)](parent.parentNode)
+                  var func = condition_id.substring(5);
+                  return window[func](parent.parentNode)    
                 }
 
                 var depends = document.getElementById(condition_id)
                 return depends == undefined || depends.checked
             })
-
+            
             if (result) {
                 next_element_id = transition_id
                 break
-            }
+            }            
         }
 
         var next_element = document.getElementById(next_element_id)
@@ -514,25 +396,35 @@ Array.from(document.getElementsByClassName('btn-navigate')).forEach(function (el
 
             var promise = new Promise(function(resolve, reject) {
                 if (!self.classList.contains('previous')) {
-                    readCaption(next_element).then(function(transition) {
-                        if (next_element.classList.contains('survey-submit')) {
-                            submitForm(next_element)
-                        } else {
-                            next_element.classList.add('active')
-                            next_element.querySelectorAll('[data-delay]').forEach(function (child) {
-                                child.dispatchEvent(new Event('displayed'))
-                            })
-                        }
-
-                        if (transition) {
-                            var buttons = next_element.getElementsByClassName('btn-navigate')
-                            buttons[0].click()
-                        }
-                        resolve()
+                  if (next_element.dataset.dialogShow != undefined) {
+                    next_element.classList.add('active');
+                  }
+                  
+                  readCaption(next_element).then(function(transition) {
+                    Array.from(next_element.querySelectorAll('button:disabled')).forEach(function (elem) {
+                      if (elem.classList.contains('ignore')) {
+                        return;
+                      }
+                      elem.disabled = false;
                     })
+                    if (next_element.classList.contains('survey-submit')) {
+                        submitForm(next_element)
+                    } else {
+                        next_element.classList.add('active')
+                        Array.from(next_element.querySelectorAll('[data-delay]')).forEach(function (child) {
+                            child.dispatchEvent(new Event('displayed'))
+                        })
+                    }
+                    
+                    if (transition) {
+                        var buttons = next_element.getElementsByClassName('btn-navigate')
+                        buttons[0].click()
+                    }
+                    resolve()
+                  })
                 } else {
                     next_element.classList.add('active')
-                    next_element.querySelectorAll('[data-delay]').forEach(function (child) {
+                    Array.from(next_element.querySelectorAll('[data-delay]')).forEach(function (child) {
                         child.dispatchEvent(new Event('displayed'))
                     })
                     resolve()
@@ -558,19 +450,6 @@ Array.from(document.getElementsByClassName('btn-navigate')).forEach(function (el
                         }
                     }
                 }
-
-                var survey_group = self.closest('.survey-group')
-                var next_group = next_element.closest('.survey-group')
-
-                if (survey_group != next_group) {
-                    // next_group.style.display = 'block'
-                    // survey_group.style.display = 'none'
-
-                    if (survey_group.dataset.grading) {
-                        grade(survey_group)
-                    }
-                }
-
                 if (!memory_service && next_element.dataset.transitionEvent) {
                     var buttons = next_element.getElementsByClassName('btn-navigate')
                     buttons[0].click()
@@ -610,7 +489,7 @@ Array.from(document.getElementsByClassName('btn-submit')).forEach(function (elem
 Array.from(document.getElementsByTagName('form')).forEach(function (element) {
     element.addEventListener("keypress", function(evt) {
         if (evt.keyCode == 13) {
-            return false
+            return evt.preventDefault();
         }
         return true
     })
@@ -636,6 +515,69 @@ Array.from(document.querySelectorAll('[data-delay]')).forEach(function(element) 
     // })
 })
 
+Array.from(document.querySelectorAll('[data-click-color]')).forEach(function(element) {
+  element.addEventListener("click", function() {
+    var parent = this.closest('table');
+    console.log(parent)
+    Array.from(parent.querySelectorAll('.colored')).forEach(function (child) {
+      child.classList.remove('colored');
+    })
+    Array.from(parent.querySelectorAll('.colored-inverted')).forEach(function (child) {
+      child.classList.remove('colored-inverted');
+    })
+    var inverted = this.dataset.clickColor == 'inverted'
+    this.classList.add('colored' + (inverted? '-inverted' : ''));
+
+    var box = document.getElementById('emotion-box');
+    if (box) {
+      box.textContent = this.textContent;
+      box.style.background = this.style.background;
+      box.className = this.className
+    }
+    Array.from(document.querySelectorAll('.ignore')).forEach(function (child) {
+      child.disabled = false;
+    })
+  })
+})
+
+Array.from(document.querySelectorAll('[type="range"][data-target]')).forEach(function(element) {
+  element.addEventListener("input", function() {
+    console.log(this.value)
+    var target = document.getElementById(this.dataset.target);
+    var children = target.children;
+    var width = target.clientWidth;
+    var height = target.clientHeight;
+
+    for (var i = 0; i < children.length; i += 1) {
+      var child = children[i];
+      var offset = 0;
+
+      if (this.dataset.axis === "horizontal") {
+        offset = (child.offsetLeft) / width * 100;
+      } else {
+        offset = (height - child.offsetTop - child.clientHeight) / height * 100;
+      }
+
+      if (offset > this.value) {
+        child.classList.add('faded');
+      } else {
+        child.classList.remove('faded');
+      }
+    }
+  })
+})
+
+Array.from(document.querySelectorAll('[data-replace-inline]')).forEach(function(element) {
+  element.addEventListener("change", function() {
+    var target = document.getElementById(this.dataset.replaceInline);
+    target.textContent = this.value;
+  })
+});
+
+Array.from(document.querySelectorAll('button')).forEach(function (element) {
+  element.disabled = true;
+});
+
 try {
     QiSession(function(session) {
         connected(session)
@@ -646,8 +588,5 @@ try {
         readCaption(boxes[0])
     }
     console.info('localhost only...')
-}
-
-if (document.getElementsByClassName('active').length == 0) {
-    document.getElementsByClassName('survey-box')[0].classList.add('active')
+    document.getElementsByClassName('survey-box')[0].querySelector('button').disabled = false;
 }
