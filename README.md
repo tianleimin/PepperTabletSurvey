@@ -206,3 +206,31 @@ This code snippet will generate a pop-up window when an error occurs allowing fo
 ## Examples
 
 Examples can be found in the `html` folder of this repository.
+
+## Academic Usage
+
+This work was published as a late-breaking report in HRI2020. You can find a copy of the paper [here](https://dl.acm.org/doi/10.1145/3371382.3378287)
+
+If you use these tools for academic research please cite our paper using the following BibTex entry:
+
+
+```bibtex
+
+@inproceedings{10.1145/3371382.3378287,
+    author = {Suddrey, Gavin and Robinson, Nicole},
+    title = {A Software System for Human-Robot Interaction To Collect Research Data: A HTML/Javascript Service on the Pepper Robot},
+    year = {2020},
+    isbn = {9781450370578},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/3371382.3378287},
+    doi = {10.1145/3371382.3378287},
+    booktitle = {Companion of the 2020 ACM/IEEE International Conference on Human-Robot Interaction},
+    pages = {459–461},
+    numpages = {3},
+    keywords = {robotics, survey toolkit, human-robot interaction, interface design},
+    location = {Cambridge, United Kingdom},
+    series = {HRI ’20}
+}
+```
+
