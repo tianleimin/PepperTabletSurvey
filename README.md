@@ -165,7 +165,7 @@ Often you will want the robot to read some dialog, before automatically progress
 
 #### Displaying Content While Reading
 
-To display content, such as images or text while the robot is reading, annotate the `survey-box` tag with a `data-show-dialog` attribute as seen below:
+To display content, such as images or text while the robot is reading, annotate the `survey-box` tag with a `data-dialog-show` attribute as seen below:
 
 ```html
 <div id="0" class="survey-box" data-show-dialog>
